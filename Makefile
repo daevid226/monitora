@@ -137,7 +137,7 @@ python:
 	@poetry run ${PYTHON_CMD}
 
 
-.PHONY: django-test test test-coverage test_%
+.PHONY: django-test test test-coverage dump-test-data
 django-test:
 	@echo "Run tests"
 	@poetry run python3 manage.py test 
@@ -147,6 +147,9 @@ test:
 test-coverage:
 	@echo "Run pytest"
 	@poetry run pytest --cov-report html --cov-report term --cov=${PROJECT_NAME}
+dump-test-data:
+	@echo "Run dump test data"
+	@poetry run python3 manage.py dumpdata api.actor api.movie api.movieactor > ./tests/initial_test_data.json
 
 
 .PHONY: start start-gunicorn start-uvicorn

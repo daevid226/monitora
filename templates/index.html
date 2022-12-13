@@ -6,16 +6,21 @@
 
     <div class="container">
 
-        <h1>{% block title %}Monitora movies{% endblock %}</h1>
+        <h1>{% block title %}Monitora - {{ title }}{% endblock %}</h1>
         
-        <form action="index/search">
-            {% bootstrap_form form layout='inline' %}
-            {% bootstrap_button "Searcg" button_type="submit" button_class="btn-primary" %}
+        <form action="index/search" method="post">
+            {% bootstrap_form form %}
+            {% csrf_token %}
+            </b>
+            {% bootstrap_button "Search" button_type="submit" button_class="btn-primary" %}
         </form>
 
         {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-
-        {% block content %}(no content){% endblock %}
+        
+        <p/>
+        {% if content %}
+        {% block content %}<div>{{ content }}{% endblock %}
+        {% endif %}
     </div>
 
 {% endblock %}

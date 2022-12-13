@@ -69,18 +69,22 @@ poetry run python3 manage.py createsuperuser --username=admin --email=admin@moni
 
 poetry run python3 manage.py createuser --username=staff --email=staff@monitora.cz
 ```
+## 5. Dump first data - Actors & Movies
+```
+make dump-data
+```
 
-## 5. Start server
+## 6. Start server
 ```
 make start
 ```
 
-### 5. Testing
+### 7. Testing
 ```
 make test
 ```
 
-### 6. Code pretty & sort imports & lint
+### 8. Code pretty & sort imports & lint
 ```
 make pretty
 

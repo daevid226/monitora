@@ -4,7 +4,7 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework.renderers import TemplateHTMLRenderer
+# from django_filters.rest_framework import FilterSet, filters
 
 from .models import Actor, Movie
 from .serializers import (
@@ -13,13 +13,13 @@ from .serializers import (
 )
 
 class ActorViewSet(viewsets.ModelViewSet):
-    renderer_classes = [TemplateHTMLRenderer]
     template_name = 'profile_detail.html'
     
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
     name = "actors"
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # manufacturer = filters.ModelChoiceFilter(queryset=Actor.objects.all())
 
 
 class MovieViewSet(viewsets.ModelViewSet):

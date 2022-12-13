@@ -4,6 +4,7 @@ from typing import List, Tuple
 import bs4
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
+from django.contrib.auth.models import User
 
 from api.utils import send_request, url_join
 from api.models import Actor, Movie, MovieActor
@@ -193,6 +194,13 @@ class Command(BaseCommand):
         if options.get("clear_database"):
             call_command("sqlflush")
             call_command("migrate")
+            
+            # add permission
+            User.objects.create_superuser(
+                username="admin",
+                email="admin@monitora.cz",
+                password="admin",
+            )
         
         # get pages & movies objects
         count = options["count"]

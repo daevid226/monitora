@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.generic.base import RedirectView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -10,8 +11,9 @@ from . import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
-    path('', views.Index.as_view(), name='index'),
-    re_path('^index/*$', views.Index.as_view(), name='index'),
+    path('login/', views.Login.as_view(), name='login'),
+    re_path(r'^$', RedirectView.as_view(url='/index/')),
+    re_path('^index/*', views.Index.as_view(), name='index'),
 ]
 
 if settings.SWAGGE_UI:
