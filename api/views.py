@@ -1,20 +1,18 @@
 from django.forms.models import model_to_dict
 from django.http.response import JsonResponse
-from rest_framework import permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework import generics
-# from django_filters.rest_framework import FilterSet, filters
 
 from .models import Actor, Movie
-from .serializers import (
-    ActorSerializer,
-    MovieSerializer,
-)
+from .serializers import ActorSerializer, MovieSerializer
+
+# from django_filters.rest_framework import FilterSet, filters
+
 
 class ActorViewSet(viewsets.ModelViewSet):
-    template_name = 'profile_detail.html'
-    
+    template_name = "profile_detail.html"
+
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
     name = "actors"
@@ -32,11 +30,11 @@ class MovieViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=["get"],
         url_name="Get movie info",
-        url_path=r"actors",
+        url_path=r"detail",
     )
-    def get_actors(self, request, pk=None, *args, **kwargs):
+    def get_movie_detail(self, request, pk=None, *args, **kwargs):
         movie = Movie.objects.get(id=pk)
-        
+
         data = model_to_dict(movie)
         response = JsonResponse(data)
         response.status_code = status.HTTP_200_OK

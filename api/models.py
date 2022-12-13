@@ -4,12 +4,12 @@ from psqlextra.indexes import UniqueIndex
 
 class Actor(models.Model):
     givenName = models.TextField(null=False, max_length=80)
-    lastName = models.TextField(null=False, default='', max_length=80)
+    lastName = models.TextField(null=False, default="", max_length=80)
     fullName = models.TextField(unique=True, null=False, max_length=256)
     url = models.TextField(null=False, max_length=1024)
-    
+
     class Meta:
-        ordering = ['lastName']
+        ordering = ["lastName"]
         indexes = [
             UniqueIndex(fields=["fullName"]),
         ]
@@ -24,11 +24,11 @@ class Movie(models.Model):
     actors = models.ManyToManyField(Actor, through="MovieActor")
 
     class Meta:
-        ordering = ['title']
+        ordering = ["title"]
         indexes = [
             UniqueIndex(fields=["title"]),
         ]
-        
+
     def __str__(self):
         return self.title
 

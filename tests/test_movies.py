@@ -55,7 +55,7 @@ class SkipPayTest(APITestCase):
             contractor=random.choice(self.contractors),
             solver=random.choice(self.solvers),
             status=models.Issue.STATUS_TODO,
-            started=faker.date_between(start_date='-30y', end_date='today'),
+            started=faker.date_between(start_date="-30y", end_date="today"),
             description=faker.text(),
         )
 
@@ -101,7 +101,7 @@ class SkipPayTest(APITestCase):
         assert "shortest-time" in response.headers
         assert "average-time" in response.headers
         assert "longest-time" in response.headers
-        
+
         print(response.headers)
 
         # check
@@ -111,17 +111,16 @@ class SkipPayTest(APITestCase):
             assert response.status_code == 200, response.content
             result = response.json()
             assert result["end"] != None
-        
+
         # TODO: Issue time is end - started
         # endet_times = models.Issue.objects.aggregate(
         #     min_time=Min("end", filter=Q(status=models.Issue.STATUS_DONE, end__isnull=False)),
         #     max_time=Max("end", filter=Q(status=models.Issue.STATUS_DONE, end__isnull=False)),
         # )
-        
+
         # print("ENDS:", endet_times)
         # assert endet_times["min_time"].toordinal() == int(response.headers["shortest-time"])
         # assert endet_times["max_time"].toordinal() == int(response.headers["longest-time"])
-        
 
     @staff_login
     def test_staff(self):

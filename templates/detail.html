@@ -5,14 +5,27 @@
 {% block bootstrap5_content %}
 
     <div class="container">
+        {% if movie %}
+            <h1>{% block title %}Movie: {{ movie.title }} detail{% endblock %}</h1>
+            
+            {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+            
+            <p>
+            {% block content %}
+            <h4>Herci:</h4>
+            <hr>
+            <ul>
+                {% for actor in movie.actors %}
+                    <li>
+                        <a href="{{actor.url}}">{{actor.fullName}}</a>
+                    </li>
+                
+                {% endfor %}
+            </ul>
+            
+            {% endblock %}
 
-        <h1>{% block title %}Movie detail{% endblock %}</h1>
-
-        
-        
-        {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-
-        {% block content %}(no content){% endblock %}
+        {% endif %}
     </div>
 
 {% endblock %}
