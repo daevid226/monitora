@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group, User
 from django.forms.models import model_to_dict  # noqa
 from rest_framework import serializers
 

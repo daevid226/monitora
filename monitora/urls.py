@@ -9,7 +9,7 @@ from . import settings, views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("api.urls")),
+    path("api/", include("api.urls"), name="api"),
     path("login/", views.Login.as_view(), name="login"),
     re_path(r"^$", RedirectView.as_view(url="/index/")),
     re_path("^index/movie/(?P<movie_id>\d+)", views.MovieDetail.as_view(), name="movie-detail"),

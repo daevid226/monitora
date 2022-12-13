@@ -1,0 +1,14 @@
+<div>       
+    {% if actors %}
+        <h4>Filmy:</h4>
+        <hr/>
+        <ul>
+            {% for actor in actors %}
+                <li>
+                    <a href="/index/actor/{{actor.id}}">{{actor.fullName}}</a>
+                </li>
+            
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

@@ -33,29 +33,57 @@ class Login(View):
             return render(request, self.template, {"form": form})
 
 
+class MovieList(TemplateView):
+
+    template_name = "detail/movie_list.html"
+
+    def get_context_data(self, **kwargs):
+        pass
+
+
+class ActorList(TemplateView):
+
+    template_name = "detail/actor_list.html"
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+
+    #     inline_context = {
+    #         'name': 'Steve'
+    #     }
+    #     inline_html_template = Template('inline_template.html')
+    #     inline_view = html_template.render(Context(inline_context))
+
+    #     context['inline_view'] = inline_view
+
+
 class Index(LoginRequiredMixin, View):
     template = "index.html"
     login_url = "/login/"
     redirect_field_name = "redirect_to"
+    title = "Search movies and actors"
 
     def post(self, request):
-        content = ""
         form = FilterForm(request.POST)
-        if form.is_valid():
-            search_text = request.POST.get("search_text")
-
-            # vyhledej
-
-            # to rest api filter
-
-            content = search_text
-        else:
+        if not form.is_valid():
             return self.form_invalid(form)
 
-        return render(request, self.template, {"form": form, "content": content, "title": "Search movies"})
+        search_text = request.POST.get("search_text")
+
+        url = request.build_absolute_uri(reverse(f"api-search", args={search_text}))
+
+        response = requests.get(url, params=request.POST)
+        response.raise_for_status()
+
+        results = response.json()["results"]  # return movies & actors
+
+        # join two View
+        content = render(request, "detail/movie_list.html", {"movies": results["movies"]}).content.decode()
+
+        return render(request, self.template, {"form": form, "content": content, "title": self.title, **results})
 
     def get(self, request):
-        return render(request, self.template, {"form": FilterForm(), "title": "Search movies"})
+        return render(request, self.template, {"form": FilterForm(), "title": self.title})
 
 
 class MovieDetail(LoginRequiredMixin, View):
