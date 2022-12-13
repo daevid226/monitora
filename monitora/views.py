@@ -1,17 +1,17 @@
+import requests
 from api import views as api_views
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views import View
-from django.views.generic import FormView
 from django.views.generic.base import TemplateView
-from rest_framework.permissions import AllowAny
-from rest_framework.renderers import TemplateHTMLRenderer
-from rest_framework.views import APIView
 
 from .forms import FilterForm
+
+# from rest_framework.renderers import TemplateHTMLRenderer
 
 
 class Login(View):
@@ -46,6 +46,8 @@ class Index(LoginRequiredMixin, View):
 
             # vyhledej
 
+            # to rest api filter
+
             content = search_text
         else:
             return self.form_invalid(form)
@@ -56,12 +58,25 @@ class Index(LoginRequiredMixin, View):
         return render(request, self.template, {"form": FilterForm(), "title": "Search movies"})
 
 
-class MoviesView(APIView):
-    template = "detail.html"
+class MovieDetail(LoginRequiredMixin, View):
+    template = "detail/movie.html"
     login_url = "/login/"
     redirect_field_name = "redirect_to"
 
-    def get(self, request, pk):
-        response = api_views.MovieViewSet.get_movie_detail(request, pk)
-        movie = response.data
+    def get(self, request, movie_id):
+        url = request.build_absolute_uri(f"/api/movies/{movie_id}")
+        response = requests.get(url, params=request.GET)
+        movie = response.json()
         return render(request, self.template, {"movie": movie})
+
+
+class ActorDetail(LoginRequiredMixin, View):
+    template = "detail/actor.html"
+    login_url = "/login/"
+    redirect_field_name = "redirect_to"
+
+    def get(self, request, actor_id):
+        url = request.build_absolute_uri(f"/api/actors/{actor_id}")
+        response = requests.get(url, params=request.GET)
+        actor = response.json()
+        return render(request, self.template, {"actor": actor})

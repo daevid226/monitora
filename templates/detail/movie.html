@@ -6,7 +6,7 @@
 
     <div class="container">
         {% if movie %}
-            <h1>{% block title %}Movie: {{ movie.title }} detail{% endblock %}</h1>
+            <h1>{% block title %}Movie: {{ movie.title }} {% endblock %}</h1>
             
             {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
             

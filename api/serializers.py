@@ -8,17 +8,12 @@ from .models import Actor, Movie
 class ActorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Actor
-        fields = ["url", "givenName", "lastName"]
+        fields = ["id", "fullName", "url"]
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    queryset = Movie.objects.all().order_by("title")
-    actors = ActorSerializer(many=True)
+    class Meta:
+        model = Movie
+        fields = "__all__"
 
-    # no need
-    # def to_representation(self, instance):
-    #     response = super().to_representation(instance)
-    #     response['category'] = model_to_dict(Category.objects.get(pk=instance.category.id))
-    #     response['contractor'] = model_to_dict(Contractor.objects.get(pk=instance.contractor.id))
-    #     response['solver'] = model_to_dict(Solver.objects.get(pk=instance.solver.id))
-    #     return response
+    actors = ActorSerializer(many=True)

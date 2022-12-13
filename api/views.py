@@ -17,7 +17,6 @@ class ActorViewSet(viewsets.ModelViewSet):
     serializer_class = ActorSerializer
     name = "actors"
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    # manufacturer = filters.ModelChoiceFilter(queryset=Actor.objects.all())
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -25,17 +24,3 @@ class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSerializer
     name = "movies"
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    @action(
-        detail=True,
-        methods=["get"],
-        url_name="Get movie info",
-        url_path=r"detail",
-    )
-    def get_movie_detail(self, request, pk=None, *args, **kwargs):
-        movie = Movie.objects.get(id=pk)
-
-        data = model_to_dict(movie)
-        response = JsonResponse(data)
-        response.status_code = status.HTTP_200_OK
-        return response

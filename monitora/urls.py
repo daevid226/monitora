@@ -12,7 +12,9 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("login/", views.Login.as_view(), name="login"),
     re_path(r"^$", RedirectView.as_view(url="/index/")),
-    re_path("^index/*", views.Index.as_view(), name="index"),
+    re_path("^index/movie/(?P<movie_id>\d+)", views.MovieDetail.as_view(), name="movie-detail"),
+    re_path("^index/actor/(?P<actor_id>\d+)", views.ActorDetail.as_view(), name="actor-detail"),
+    re_path("^index/", views.Index.as_view(), name="index"),
 ]
 
 if settings.SWAGGE_UI:

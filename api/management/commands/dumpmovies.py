@@ -193,6 +193,13 @@ class Command(BaseCommand):
                 password="admin",
             )
 
+            User.objects.create(
+                username="staff",
+                email="staff@monitora.cz",
+                password="staff",
+                is_staff=True,
+            )
+
         # get pages & movies objects
         count = options["count"]
         first_url = url_join(CSFD_URL, CSFD_BEST_MOVIES_PATH)

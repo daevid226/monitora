@@ -1,0 +1,23 @@
+{% extends 'bootstrap.html' %}
+
+{% load bootstrap5 %}
+
+{% block bootstrap5_content %}
+
+    <div class="container">
+        {% if actor %}
+            <h1>{% block title %}Actor: {{ actor.fullName }} detail{% endblock %}</h1>
+            
+            {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+            
+            <p>
+            {% block content %}
+            <hr>
+                Link: <a href="{{actor.url}}">{{actor.url}}</a>
+            
+            {% endblock %}
+
+        {% endif %}
+    </div>
+
+{% endblock %}
