@@ -1,0 +1,27 @@
+# General things to ignore.
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+# Database
+db.sqlite3
+
+# Virtual environment and local bash for environment variables
+.venv/
+.env*
+
+# Due to using pytest.
+.cache
+
+# Editors.
+*.sw[op]
+.idea
+.vscode
+
+# Tests.
+.coverage
+.hypothesis/
+htmlcov/
+pgdata/
+tests/db.sqlite
