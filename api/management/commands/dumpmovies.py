@@ -104,15 +104,15 @@ class MovieData:
         title_node = node.find("a", {"class": "film-title-name"})
         title = title_node.get("title")
         path = title_node.get("href")
-        
+
         if full_info:
             movie_url = url_join(CSFD_URL, path)
             content = send_request(movie_url)
             movie = parse_movie_page(content)
             movie.path = path
-            
+
         actors = []
-        
+
         creators_nodes = node.find_all("p", {"class": "film-creators"})
         for child in creators_nodes:
             if child.getText().startswith("Hrají:"):
@@ -132,13 +132,13 @@ class MovieData:
 
 def parse_movie_page(content) -> MovieData:
     soup = bs4.BeautifulSoup(content, "lxml")
-    
+
     movie_info = soup.find("body").find("div", {"class": "main-movie"}).find("div", {"class": "film-info"})
     movie_header = movie_info.find("header", {"class": "film-header"})
-    
+
     title_node = movie_header.find("div", {"class": "film-header-name"}).find("h1")
     title = title_node.getText().strip()
-    
+
     actors = []
     creators_nodes = movie_info.find("div", {"class": "creators"}).find_all("div")
     for child in creators_nodes:
@@ -146,8 +146,9 @@ def parse_movie_page(content) -> MovieData:
         if text_node.getText().startswith("Hrají:"):
             actors = [ActorData.from_node(a_node) for a_node in child.find_all("a")]
             break
-    
+
     return MovieData(title, "", actors, -1)
+
 
 def parse_page(content, pages=False, *, all_actors=False) -> Tuple[List[MovieData], List[PageData]]:
     """
@@ -197,12 +198,12 @@ class Command(BaseCommand):
         if options.get("clear_database"):
             call_command("sqlflush")
             call_command("migrate")
-            
+
             if options.get("set-default-password"):
-                admin = User.objects.get(username='admin')
+                admin = User.objects.get(username="admin")
                 admin.set_password("admin")
-                
-                staff = User.objects.get(username='admin')
+
+                staff = User.objects.get(username="admin")
                 staff.set_password("staff")
 
         # get pages & movies objects
@@ -210,7 +211,7 @@ class Command(BaseCommand):
         first_url = url_join(CSFD_URL, CSFD_BEST_MOVIES_PATH)
         content = send_request(first_url)
         full_actors = options.get("full_actors", False)
-        
+
         movies, pages = parse_page(content, pages=True, all_actors=full_actors)
         for page in pages:
             page_url = url_join(CSFD_URL, page.path)

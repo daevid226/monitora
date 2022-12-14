@@ -6,7 +6,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic.base import TemplateView
 
 from .forms import FilterForm
 
@@ -30,30 +29,6 @@ class Login(View):
             return render(request, self.template, {"form": form})
 
 
-class MovieList(TemplateView):
-
-    template_name = "detail/movie_list.html"
-
-    def get_context_data(self, **kwargs):
-        pass
-
-
-class ActorList(TemplateView):
-
-    template_name = "detail/actor_list.html"
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-
-    #     inline_context = {
-    #         'name': 'Steve'
-    #     }
-    #     inline_html_template = Template('inline_template.html')
-    #     inline_view = html_template.render(Context(inline_context))
-
-    #     context['inline_view'] = inline_view
-
-
 class Index(LoginRequiredMixin, View):
     template = "index.html"
     login_url = "/login/"
@@ -67,7 +42,7 @@ class Index(LoginRequiredMixin, View):
 
         search_text = request.POST.get("search_text")
 
-        url = request.build_absolute_uri(reverse(f"api-search", args={search_text}))
+        url = request.build_absolute_uri(reverse("api-search", args={search_text}))
 
         response = requests.get(url, params=request.POST)
         response.raise_for_status()
@@ -75,9 +50,13 @@ class Index(LoginRequiredMixin, View):
         results = response.json()["results"]  # return movies & actors
 
         # join two View
-        content = render(request, "detail/movie_list.html", {"movies": results["movies"]}).content.decode()
+        # content = render(request, "detail/movie_list.html", {"movies": results["movies"]}).content.decode()
 
-        return render(request, self.template, {"form": form, "content": content, "title": self.title, **results})
+        return render(
+            request,
+            self.template,
+            {"form": form, "movies": results["movies"], "actors": results["actors"], "title": self.title, **results},
+        )
 
     def get(self, request):
         return render(request, self.template, {"form": FilterForm(), "title": self.title})

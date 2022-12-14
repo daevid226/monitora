@@ -55,24 +55,23 @@ class ApiTest(APITestCase):
 
     def _new_movie(self):
         pass
-    
+
     @admin_login
     def test_post_actor(self):
         pass
-    
+
     @admin_login
     def test_post_movie(self):
         pass
-    
+
     @admin_login
     def test_get_actors(self):
         response = self.client.get("/api/actors/", format="json")
         assert response.status_code == 200, response.content
         result = response.json()
         actors = result["results"]
-        
-        #for actor in random.choice(actors, )
-        
+
+        # for actor in random.choice(actors, )
 
     @staff_login
     def test_get_movies(self):
@@ -81,7 +80,7 @@ class ApiTest(APITestCase):
     @staff_login
     def test_search(self):
         pass
-    
+
     @staff_login
     def test_staff(self):
         actor = self._new_actor()

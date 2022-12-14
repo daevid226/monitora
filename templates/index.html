@@ -18,9 +18,22 @@
         {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
         
         <p/>
-        {% if content %}
-        {% block content %}{{ content }}{% endblock %}
-        {% endif %}
+        {% block content %}
+            <table style="width:100%">
+                <tr>
+                    <td style="width:50%;text-align:left;vertical-align:top;">
+                    {% if movies %}
+                        {% include "detail/movie_list.html" %}
+                    {% endif %}
+                    </td>
+                    <td style="width:50%;text-align:left;vertical-align:top;">
+                    {% if actors %}
+                        {% include "detail/actor_list.html" %}
+                    {% endif %}
+                    </td>
+                </tr>
+            </table>
+        {% endblock %}
     </div>
 
 {% endblock %}
