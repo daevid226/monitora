@@ -1,17 +1,14 @@
 import requests
-from api import views as api_views
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 from django.views.generic.base import TemplateView
 
 from .forms import FilterForm
-
-# from rest_framework.renderers import TemplateHTMLRenderer
 
 
 class Login(View):

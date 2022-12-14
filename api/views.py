@@ -10,8 +10,6 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import Actor, Movie
 from .serializers import ActorSerializer, MovieSerializer
 
-# from django_filters.rest_framework import FilterSet, filters
-
 
 class ActorViewSet(viewsets.ModelViewSet):
     template_name = "profile_detail.html"
@@ -35,14 +33,14 @@ def search(request, search_text):
     """
     Fulltext search
     """
-    search_text = unidecode.unidecode(search_text)
+    search_text = unidecode.unidecode(search_text).lower()
 
     if connection.vendor == "sqlite":
-        movie_filter = dict(title__contains=search_text)
-        actor_filter = dict(fullName__contains=search_text)
+        movie_filter = dict(title__icontains=search_text)
+        actor_filter = dict(fullName__icontains=search_text)
     else:
-        movie_filter = dict(title__contains=search_text)
-        actor_filter = dict(fullName__contains=search_text)
+        movie_filter = dict(title__icontains=search_text)
+        actor_filter = dict(fullName__icontains=search_text)
 
     movies = Movie.objects.filter(**movie_filter).only("id", "title", "url")
     actors = Actor.objects.filter(**actor_filter).only("id", "fullName", "url")

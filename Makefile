@@ -2,7 +2,6 @@ ifndef PYTHON_VERSION
 override PYTHON_VERSION = 3.8
 endif
 
-BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
 PYTHON_CMD := python${PYTHON_VERSION}
 POETRY_RUN := poetry run
 POETRY_CMD := ${POETRY_RUN} python3
@@ -165,7 +164,7 @@ start-uvicorn:
 
 
 
-.PHONY: migrate migration-generate database-recreate dump-movies
+.PHONY: migrate migration-generate database-recreate dump-movies dump-movies-full
 migrate:
 	@echo "Run migrate database"
 	${POETRY_CMD} manage.py migrate
@@ -178,7 +177,10 @@ database-recreate: database-recreate
 	$(MAKE migrate)
 dump-movies:
 	@echo "Run migrate database"
-	${POETRY_CMD} manage.py dumpmovies --clear-database --count 300
+	${POETRY_CMD} manage.py dumpmovies --clear-database --count 300 --set-default-password
+dump-movies-full:
+	@echo "Run migrate database"
+	${POETRY_CMD} manage.py dumpmovies --clear-database --count 100 --set-default-password --full-actors
 
 
 .PHONY: docker-build docker-build-cache docker-run docker-sh docker-stop docker-remove docker-push docker-show-all

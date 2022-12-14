@@ -54,11 +54,6 @@ class ActorData:
 
 
 @dataclass
-class MovieInfo:
-    path: str
-
-
-@dataclass
 class MovieData:
     """
     Example:
@@ -109,18 +104,20 @@ class MovieData:
         title_node = node.find("a", {"class": "film-title-name"})
         title = title_node.get("title")
         path = title_node.get("href")
-
-        # actors
-        actors = []
+        
         if full_info:
             movie_url = url_join(CSFD_URL, path)
             content = send_request(movie_url)
-            parse_movie_page(content)
-        else:
-            creators_nodes = node.find_all("p", {"class": "film-creators"})
-            for child in creators_nodes:
-                if child.getText().startswith("Hrají:"):
-                    actors = [ActorData.from_node(a_node) for a_node in child.find_all("a")]
+            movie = parse_movie_page(content)
+            movie.path = path
+            
+        actors = []
+        
+        creators_nodes = node.find_all("p", {"class": "film-creators"})
+        for child in creators_nodes:
+            if child.getText().startswith("Hrají:"):
+                actors = [ActorData.from_node(a_node) for a_node in child.find_all("a")]
+                break
 
         return MovieData(title, path, actors, -1)
 
@@ -133,13 +130,26 @@ class MovieData:
         return result
 
 
-def parse_movie_page(content):
+def parse_movie_page(content) -> MovieData:
     soup = bs4.BeautifulSoup(content, "lxml")
+    
+    movie_info = soup.find("body").find("div", {"class": "main-movie"}).find("div", {"class": "film-info"})
+    movie_header = movie_info.find("header", {"class": "film-header"})
+    
+    title_node = movie_header.find("div", {"class": "film-header-name"}).find("h1")
+    title = title_node.getText().strip()
+    
+    actors = []
+    creators_nodes = movie_info.find("div", {"class": "creators"}).find_all("div")
+    for child in creators_nodes:
+        text_node = child.find("h4")
+        if text_node.getText().startswith("Hrají:"):
+            actors = [ActorData.from_node(a_node) for a_node in child.find_all("a")]
+            break
+    
+    return MovieData(title, "", actors, -1)
 
-    # if articles_node := soup.find("body").find("div", {"class": "box-content-striped-articles"}):
-
-
-def parse_page(content, pages=False) -> Tuple[List[MovieData], List[PageData]]:
+def parse_page(content, pages=False, *, all_actors=False) -> Tuple[List[MovieData], List[PageData]]:
     """
     <div class="box-content box-content-striped-articles">
         <div class="box-more-bar box-more-bar-charts">
@@ -168,7 +178,7 @@ def parse_page(content, pages=False) -> Tuple[List[MovieData], List[PageData]]:
                 for a_node in articles_node.find("div", {"class": "box-more-bar box-more-bar-charts"}).find_all("a")
             ]
 
-        _movies = [MovieData.from_node(a_node) for a_node in articles_node.find_all("article")]
+        _movies = [MovieData.from_node(a_node, all_actors) for a_node in articles_node.find_all("article")]
 
     return _movies, _pages
 
@@ -179,36 +189,33 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--count", required=False, type=int, default=300)
         parser.add_argument("--clear-database", action="store_true")
+        parser.add_argument("--set-default-password", action="store_true")
+        parser.add_argument("--full-actors", action="store_true")
 
     def handle(self, *args, **options):
 
         if options.get("clear_database"):
             call_command("sqlflush")
             call_command("migrate")
-
-            # add permission
-            User.objects.create_superuser(
-                username="admin",
-                email="admin@monitora.cz",
-                password="admin",
-            )
-
-            User.objects.create(
-                username="staff",
-                email="staff@monitora.cz",
-                password="staff",
-                is_staff=True,
-            )
+            
+            if options.get("set-default-password"):
+                admin = User.objects.get(username='admin')
+                admin.set_password("admin")
+                
+                staff = User.objects.get(username='admin')
+                staff.set_password("staff")
 
         # get pages & movies objects
         count = options["count"]
         first_url = url_join(CSFD_URL, CSFD_BEST_MOVIES_PATH)
         content = send_request(first_url)
-        movies, pages = parse_page(content, pages=True)
+        full_actors = options.get("full_actors", False)
+        
+        movies, pages = parse_page(content, pages=True, all_actors=full_actors)
         for page in pages:
             page_url = url_join(CSFD_URL, page.path)
             content = send_request(page_url)
-            page_movies, _n = parse_page(content)
+            page_movies, _n = parse_page(content, all_actors=full_actors)
             movies.extend(page_movies)
 
             if len(movies) >= count:
@@ -217,7 +224,7 @@ class Command(BaseCommand):
 
         # save to database
         # insert actors
-        all_actors = dict()  # temp actor list, remove duplicity
+        all_actors = dict()  # temp actor list
 
         # remove actor duplicity
         for movie in movies:

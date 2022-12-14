@@ -17,7 +17,8 @@ def django_db_setup(django_db_blocker):
 
     # clear database & migrate & add users
     with django_db_blocker.unblock():
-        call_command("dumpmovies --clear-database")
+        call_command("sqlflush")
+        call_command("migrate")
 
         # load data
         call_command("loaddata", os.path.join(settings.BASE_DIR, "tests", "initial_test_data.json"))
