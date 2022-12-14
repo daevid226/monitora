@@ -1,0 +1,5 @@
+[tool.isort]
+profile = black
+src_paths = src,tests
+py_version = 38
+multi_line_output = 3

@@ -1,0 +1,14 @@
+<div>       
+    {% if movies %}
+        <h4>Filmy:</h4>
+        <hr/>
+        <ul>
+            {% for movie in movies %}
+                <li>
+                    <a href="/index/movie/{{movie.id}}">{{movie.title}}</a>
+                </li>
+            
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

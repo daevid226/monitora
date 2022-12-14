@@ -1,0 +1,10 @@
+[virtualenvs]
+create = true
+in-project = true
+ 
+[experimental]
+new-installer = false
+ 
+[installer]
+parallel = true
+max-workers = 16

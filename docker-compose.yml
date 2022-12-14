@@ -1,0 +1,42 @@
+---
+version: "3.8"
+services:
+    db:
+        image: postgres:13
+        restart: on-failure
+        env_file:
+            - .env
+        environment:
+            POSTGRES_USER: ${DATABASE_USER}
+            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+            POSTGRES_DB: ${DATABASE_NAME}
+        volumes:
+            - "${PG_DATA}:/var/lib/postgresql/data/"
+        networks:
+            - api_network
+        privileged: true
+    api:
+        env_file:
+            - .env
+        environment:
+            DATABASE_HOST: db
+        build:
+            context: .
+            network: host
+            dockerfile: Dockerfile
+        volumes:
+            - ./docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+            - ./migrations/:/home/appuser/migrations/
+            - ./alembic.ini:/home/appuser/alembic.ini
+        command:
+            - docker-entrypoint.sh
+        depends_on:
+            - db
+        ports:
+            - "8000:8000"
+        networks:
+            - api_network
+        privileged: true
+networks:
+    api_network:
+        driver: bridge

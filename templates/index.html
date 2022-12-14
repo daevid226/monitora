@@ -1,0 +1,39 @@
+{% extends 'bootstrap.html' %}
+
+{% load bootstrap5 %}
+
+{% block bootstrap5_content %}
+
+    <div class="container">
+
+        <h1>{% block title %}Monitora - {{ title }}{% endblock %}</h1>
+        
+        <form action="/index/" method="post">
+            {% bootstrap_form form %}
+            {% csrf_token %}
+            </b>
+            {% bootstrap_button "Search" button_type="submit" button_class="btn-primary" %}
+        </form>
+
+        {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+        
+        <p/>
+        {% block content %}
+            <table style="width:100%">
+                <tr>
+                    <td style="width:50%;text-align:left;vertical-align:top;">
+                    {% if movies %}
+                        {% include "detail/movie_list.html" %}
+                    {% endif %}
+                    </td>
+                    <td style="width:50%;text-align:left;vertical-align:top;">
+                    {% if actors %}
+                        {% include "detail/actor_list.html" %}
+                    {% endif %}
+                    </td>
+                </tr>
+            </table>
+        {% endblock %}
+    </div>
+
+{% endblock %}

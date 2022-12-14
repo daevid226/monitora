@@ -1,0 +1,22 @@
+
+{% extends 'bootstrap.html' %}
+
+{% load bootstrap5 %}
+
+{% block bootstrap5_content %}
+
+    <div class="container">
+        {% if form.errors %}
+        <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
+
+        <form method="post" action="/login/">
+            {% bootstrap_form form %}
+            {% csrf_token %}
+            {% bootstrap_button "Login" button_type="submit" button_class="btn-primary" %}
+        </form>
+            
+        {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+    </div>
+
+{% endblock %}
