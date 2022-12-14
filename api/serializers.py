@@ -14,4 +14,4 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = "__all__"
 
-    actors = ActorSerializer(many=True)
+    actors = ActorSerializer(many=True, required=True, read_only=False)

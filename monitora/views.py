@@ -49,9 +49,6 @@ class Index(LoginRequiredMixin, View):
 
         results = response.json()["results"]  # return movies & actors
 
-        # join two View
-        # content = render(request, "detail/movie_list.html", {"movies": results["movies"]}).content.decode()
-
         return render(
             request,
             self.template,
