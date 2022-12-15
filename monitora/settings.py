@@ -174,3 +174,7 @@ BOOTSTRAP5 = {
     "required_css_class": "bootstrap5-required",
     "javascript_in_head": True,
 }
+
+CSRF_COOKIE_SECURE = True
+CSRF_USE_SESSIONS = True
+SESSION_COOKIE_SECURE = False

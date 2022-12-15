@@ -6,6 +6,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.generic.edit import FormView
 
 from .forms import FilterForm
 
@@ -29,12 +31,16 @@ class Login(View):
             return render(request, self.template, {"form": form})
 
 
-class Index(LoginRequiredMixin, View):
+class Index(LoginRequiredMixin, FormView):
     template = "index.html"
     login_url = "/login/"
     redirect_field_name = "redirect_to"
     title = "Search movies and actors"
-
+    template_name = "index.html"
+    form_class = FilterForm
+    success_url = "/index/"
+    
+    @csrf_exempt
     def post(self, request):
         form = FilterForm(request.POST)
         if not form.is_valid():
@@ -56,7 +62,7 @@ class Index(LoginRequiredMixin, View):
         )
 
     def get(self, request):
-        return render(request, self.template, {"form": FilterForm(), "title": self.title})
+        return render(request, self.template, {"form": FilterForm, "title": self.title})
 
 
 class MovieDetail(LoginRequiredMixin, View):
