@@ -49,6 +49,8 @@ Database settings:
 
 
 ## 3. Migrate database
+For next step, needed create database and dump movies.
+
 ```
 make migrate
 ```
@@ -63,25 +65,47 @@ Clear database
 make database-recreate
 ```
 
-## 4. Add supervisor or another users
+### Add supervisor or another users
 ```
 poetry run python3 manage.py createsuperuser --username=admin --email=admin@monitora.cz
 
 poetry run python3 manage.py createuser --username=staff --email=staff@monitora.cz
 ```
-## 5. Dump first data - Actors & Movies
+### Dump first data - Actors & Movies
+Optional CI arguments:
+
+* --count  default=300)
+* --clear-database
+* --set-default-password
+* --full-actors
+
+
 ```
-make dump-data
+make dump-movies
+
+# or if need load all actors, use this command
+
+make dump-movies-full
 ```
 
 ## 6. Start server
 ```
 make start
 ```
+Open browser and enter http://127.0.0.1, automatic redirect to http://127.0.0.1/index.
+Need logged as admin or staff.
 
-### 7. Testing
+
+
+
+## 7. Testing
+#### Functional tests
 ```
 make test
+```
+#### Performance test
+```
+make perf-test
 ```
 
 ### 8. Code pretty & sort imports & lint
@@ -129,3 +153,4 @@ make docker-compose-up
 
 ## Changelog
 - 1.0.0: Create project.
+- 1.1.0: Update api MovirSerializer. Added tests.

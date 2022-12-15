@@ -14,7 +14,7 @@ def django_db_setup(django_db_blocker):
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory",
     }
-    
+
     # clear database & migrate & add users
     with django_db_blocker.unblock():
         call_command("sqlflush")

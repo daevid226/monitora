@@ -3,8 +3,8 @@ import random
 import pytest
 from api import models
 from django.contrib.auth.models import User
-from rest_framework import status
 from faker import Faker
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 # Generator fake data
@@ -37,10 +37,10 @@ def staff_login(fn):
 class ApiTest(APITestCase):
     def setUp(self) -> None:
         super().setUp()
-        
+
         # load data
         self.actors = list(models.Actor.objects.all())
-        self.movies = list(models.Movie.objects.all())#.values_list("id", flat=True))
+        self.movies = list(models.Movie.objects.all())  # .values_list("id", flat=True))
 
     def _new_actor(self):
         fullName = faker.name()
@@ -65,12 +65,12 @@ class ApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.content)
         result = response.json()
         actors = result["results"]
-        
+
         for actor in random.choices(actors, k=14):
             response = self.client.get(f"/api/actors/{actor['id']}", {}, True, format="json")
             self.assertEqual(response.status_code, 200, msg=response.content)
             self.assertEqual(actor["id"], response.json()["id"])
-    
+
     @staff_login
     def test_get_movies(self):
         response = self.client.get("/api/movies/", format="json")
@@ -83,56 +83,55 @@ class ApiTest(APITestCase):
             self.assertEqual(response.status_code, 200, msg=response.content)
             result = response.json()
             self.assertEqual(movie["id"], result["id"])
-            self.assertTrue(len(result["actors"])>0)
-
+            self.assertTrue(len(result["actors"]) > 0)
 
     @admin_login
-    def test_post_actor(self):
+    def test_crud_actor(self):
         actor = self._new_actor()
         response = self.client.post("/api/actors/", actor, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, msg=response.content)
-        
+
         result = response.json()
-        
+        actor_id = result["id"]
+
         # check in database
-        model_actor = models.Actor.objects.get(pk=result["id"])
+        model_actor = models.Actor.objects.get(pk=actor_id)
         self.assertIsInstance(model_actor, models.Actor)
-        
+
         # get
-        response = self.client.get(f"/api/actors/{model_actor.id}", {}, True, format="json")
-        self.assertEqual(response.status_code, 200, msg=response.content)
-        self.assertEqual(model_actor.id, response.json()["id"])
+        response = self.client.get(f"/api/actors/{actor_id}", {}, True, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.content)
+        self.assertEqual(response.json()["id"], actor_id)
+
+        # delete
+        response = self.client.delete(f"/api/actors/{actor_id}", follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.content)
 
     @admin_login
-    def test_post_movie(self):
+    def test_crud_movie(self):
         movie = self._new_movie()
         response = self.client.post("/api/movies/", movie, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, msg=response.content)
-        
-        return response.json()
+
+        result = response.json()
+        response = self.client.get(f"/api/movies/{result['id']}", {}, True, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.content)
+
+        # delete
+        response = self.client.delete(f"/api/movies/{result['id']}", follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.content)
 
     @staff_login
     def test_search(self):
         search_text = "ab"
-        
+
         response = self.client.get("/api/search/" + search_text, {}, True)
         self.assertEqual(response.status_code, 200, msg=response.content)
-        
+
         result = response.json()["results"]
         movies, actors = result.get("movies"), result.get("actors")
         self.assertTrue(movies)
         self.assertTrue(actors)
-        
+
         self.assertEqual(len(movies), 4)
         self.assertEqual(len(actors), 10)
-
-    @staff_login
-    def _test_staff(self):
-        # post, mutation isdenied
-        actor = self._new_actor()
-        response = self.client.post("/api/actors/", actor, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, msg=response.content)
-
-        # get is ok
-        response = self.client.get(f"/api/movies/")
-        self.assertEqual(response.status_code, 200, msg=response.content)
