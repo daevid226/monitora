@@ -157,7 +157,7 @@ perf-test:
 .PHONY: start start-gunicorn start-uvicorn
 start:
 	@echo "Start guicorn"
-	@poetry run python manage.py runserver 8000
+	@poetry run python manage.py runserver 8100
 start-gunicorn:
 	@echo "Start gnuicorn"
 	${POETRY_CMD} -m gunicorn --reload monitora.asgi:application -k uvicorn.workers.UvicornWorker

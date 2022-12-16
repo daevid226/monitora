@@ -186,15 +186,15 @@ async def parse_page(content, pages=False, *, all_actors=False) -> Tuple[List[Mo
 
 
 async def main(commander, *args, **options):
-    
+
     # get pages & movies objects
     count = options["count"]
-     
+
     # send first request
     first_url = url_join(CSFD_URL, CSFD_BEST_MOVIES_PATH)
     content = await send_request_async(first_url)
     full_actors = options.get("full_actors", False)
-    
+
     # send
     movies, pages = await parse_page(content, pages=True, all_actors=full_actors)
     for page in pages:
@@ -206,8 +206,9 @@ async def main(commander, *args, **options):
         if len(movies) >= count:
             movies = movies[:count]
             break
-    
+
     return movies
+
 
 class Command(BaseCommand):
     help = "Closes the specified poll for voting"
@@ -231,7 +232,7 @@ class Command(BaseCommand):
                 staff.set_password("staff")
 
         movies = asyncio.run(main(self, *args, **options))
-    
+
         # save to database
         # insert actors
         all_actors = dict()  # temp actor list
@@ -264,5 +265,5 @@ class Command(BaseCommand):
             for actor in movie.actors:
                 movie_record.actors.add(all_actors[actor.fullName].id)
             movie_record.save()
-            
+
         self.stdout.write(self.style.SUCCESS("Successfully parse and dumps %d movies" % len(movies)))

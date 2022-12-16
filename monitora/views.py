@@ -4,20 +4,20 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import FormView
 
 from .forms import FilterForm
 
 
-class Login(View):
-    template = "login.html"
-
-    def get(self, request):
-        form = AuthenticationForm()
-        return render(request, self.template, {"form": form})
+class Login(FormView):
+    template_name = "login.html"
+    form_class = AuthenticationForm
+    success_url = "/index/"
 
     def post(self, request):
         form = AuthenticationForm(request.POST)
@@ -28,20 +28,26 @@ class Login(View):
             login(request, user)
             return HttpResponseRedirect("/index/")
         else:
-            return render(request, self.template, {"form": form})
+            return render(request, self.template_name, {"form": form})
 
 
 class Index(LoginRequiredMixin, FormView):
-    template = "index.html"
     login_url = "/login/"
     redirect_field_name = "redirect_to"
+    #
     title = "Search movies and actors"
     template_name = "index.html"
     form_class = FilterForm
     success_url = "/index/"
-    
-    @csrf_exempt
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
     def post(self, request):
+        if isinstance(request, TemplateResponse):
+            return request
+
         form = FilterForm(request.POST)
         if not form.is_valid():
             return self.form_invalid(form)
@@ -57,12 +63,9 @@ class Index(LoginRequiredMixin, FormView):
 
         return render(
             request,
-            self.template,
+            self.template_name,
             {"form": form, "movies": results["movies"], "actors": results["actors"], "title": self.title, **results},
         )
-
-    def get(self, request):
-        return render(request, self.template, {"form": FilterForm, "title": self.title})
 
 
 class MovieDetail(LoginRequiredMixin, View):
