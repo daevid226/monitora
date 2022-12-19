@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    'rest_framework.authtoken',
     "drf_yasg",
     "api",
     "monitora",
@@ -174,3 +175,8 @@ BOOTSTRAP5 = {
     "required_css_class": "bootstrap5-required",
     "javascript_in_head": True,
 }
+
+CSRF_COOKIE_SECURE = True
+CSRF_USE_SESSIONS = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_NAME = "monitora"

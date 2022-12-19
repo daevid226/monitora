@@ -38,4 +38,4 @@ class MovieActor(models.Model):
     actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{}_{}".format(self.movie.__str__(), self.acotor.__str__())
+        return f"{self.movie!s}_{self.actor!s}"

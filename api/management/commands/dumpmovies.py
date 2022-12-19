@@ -1,9 +1,10 @@
+import asyncio
 from dataclasses import dataclass
 from typing import List, Tuple
 
 import bs4
 from api.models import Actor, Movie
-from api.utils import send_request, url_join
+from api.utils import send_request_async, url_join
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -100,14 +101,14 @@ class MovieData:
     id: int
 
     @classmethod
-    def from_node(cls, node: bs4.element.Tag, full_info=False):
+    async def from_node(cls, node: bs4.element.Tag, full_info=False):
         title_node = node.find("a", {"class": "film-title-name"})
         title = title_node.get("title")
         path = title_node.get("href")
 
         if full_info:
             movie_url = url_join(CSFD_URL, path)
-            content = send_request(movie_url)
+            content = await send_request_async(movie_url)
             movie = parse_movie_page(content)
             movie.path = path
 
@@ -150,7 +151,7 @@ def parse_movie_page(content) -> MovieData:
     return MovieData(title, "", actors, -1)
 
 
-def parse_page(content, pages=False, *, all_actors=False) -> Tuple[List[MovieData], List[PageData]]:
+async def parse_page(content, pages=False, *, all_actors=False) -> Tuple[List[MovieData], List[PageData]]:
     """
     <div class="box-content box-content-striped-articles">
         <div class="box-more-bar box-more-bar-charts">
@@ -179,9 +180,34 @@ def parse_page(content, pages=False, *, all_actors=False) -> Tuple[List[MovieDat
                 for a_node in articles_node.find("div", {"class": "box-more-bar box-more-bar-charts"}).find_all("a")
             ]
 
-        _movies = [MovieData.from_node(a_node, all_actors) for a_node in articles_node.find_all("article")]
+        _movies = [await MovieData.from_node(a_node, all_actors) for a_node in articles_node.find_all("article")]
 
     return _movies, _pages
+
+
+async def main(commander, *args, **options):
+
+    # get pages & movies objects
+    count = options["count"]
+
+    # send first request
+    first_url = url_join(CSFD_URL, CSFD_BEST_MOVIES_PATH)
+    content = await send_request_async(first_url)
+    full_actors = options.get("full_actors", False)
+
+    # send
+    movies, pages = await parse_page(content, pages=True, all_actors=full_actors)
+    for page in pages:
+        page_url = url_join(CSFD_URL, page.path)
+        content = await send_request_async(page_url)
+        page_movies, _n = await parse_page(content, all_actors=full_actors)
+        movies.extend(page_movies)
+
+        if len(movies) >= count:
+            movies = movies[:count]
+            break
+
+    return movies
 
 
 class Command(BaseCommand):
@@ -194,7 +220,6 @@ class Command(BaseCommand):
         parser.add_argument("--full-actors", action="store_true")
 
     def handle(self, *args, **options):
-
         if options.get("clear_database"):
             call_command("sqlflush")
             call_command("migrate")
@@ -206,22 +231,7 @@ class Command(BaseCommand):
                 staff = User.objects.get(username="admin")
                 staff.set_password("staff")
 
-        # get pages & movies objects
-        count = options["count"]
-        first_url = url_join(CSFD_URL, CSFD_BEST_MOVIES_PATH)
-        content = send_request(first_url)
-        full_actors = options.get("full_actors", False)
-
-        movies, pages = parse_page(content, pages=True, all_actors=full_actors)
-        for page in pages:
-            page_url = url_join(CSFD_URL, page.path)
-            content = send_request(page_url)
-            page_movies, _n = parse_page(content, all_actors=full_actors)
-            movies.extend(page_movies)
-
-            if len(movies) >= count:
-                movies = movies[:count]
-                break
+        movies = asyncio.run(main(self, *args, **options))
 
         # save to database
         # insert actors

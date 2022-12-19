@@ -4,18 +4,20 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.edit import FormView
 
 from .forms import FilterForm
 
 
-class Login(View):
-    template = "login.html"
-
-    def get(self, request):
-        form = AuthenticationForm()
-        return render(request, self.template, {"form": form})
+class Login(FormView):
+    template_name = "login.html"
+    form_class = AuthenticationForm
+    success_url = "/index/"
 
     def post(self, request):
         form = AuthenticationForm(request.POST)
@@ -26,16 +28,30 @@ class Login(View):
             login(request, user)
             return HttpResponseRedirect("/index/")
         else:
-            return render(request, self.template, {"form": form})
+            return render(request, self.template_name, {"form": form})
 
 
-class Index(LoginRequiredMixin, View):
-    template = "index.html"
+class Index(LoginRequiredMixin, FormView):
     login_url = "/login/"
     redirect_field_name = "redirect_to"
+    #
     title = "Search movies and actors"
+    template_name = "index.html"
+    form_class = FilterForm
+    success_url = "/index/"
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request):
+        self.request = request
+        
+        print(request.__dict__)
+        
+        if isinstance(request, TemplateResponse):
+            return request
+
         form = FilterForm(request.POST)
         if not form.is_valid():
             return self.form_invalid(form)
@@ -43,24 +59,17 @@ class Index(LoginRequiredMixin, View):
         search_text = request.POST.get("search_text")
 
         url = request.build_absolute_uri(reverse("api-search", args={search_text}))
-
+        
         response = requests.get(url, params=request.POST)
         response.raise_for_status()
 
         results = response.json()["results"]  # return movies & actors
 
-        # join two View
-        # content = render(request, "detail/movie_list.html", {"movies": results["movies"]}).content.decode()
-
         return render(
             request,
-            self.template,
+            self.template_name,
             {"form": form, "movies": results["movies"], "actors": results["actors"], "title": self.title, **results},
         )
-
-    def get(self, request):
-        return render(request, self.template, {"form": FilterForm(), "title": self.title})
-
 
 class MovieDetail(LoginRequiredMixin, View):
     template = "detail/movie.html"
