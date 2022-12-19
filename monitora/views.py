@@ -45,6 +45,10 @@ class Index(LoginRequiredMixin, FormView):
         return super().dispatch(*args, **kwargs)
 
     def post(self, request):
+        self.request = request
+        
+        print(request.__dict__)
+        
         if isinstance(request, TemplateResponse):
             return request
 
@@ -55,7 +59,7 @@ class Index(LoginRequiredMixin, FormView):
         search_text = request.POST.get("search_text")
 
         url = request.build_absolute_uri(reverse("api-search", args={search_text}))
-
+        
         response = requests.get(url, params=request.POST)
         response.raise_for_status()
 
@@ -66,7 +70,6 @@ class Index(LoginRequiredMixin, FormView):
             self.template_name,
             {"form": form, "movies": results["movies"], "actors": results["actors"], "title": self.title, **results},
         )
-
 
 class MovieDetail(LoginRequiredMixin, View):
     template = "detail/movie.html"

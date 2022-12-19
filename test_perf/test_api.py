@@ -17,7 +17,7 @@ class MonitoraUser(HttpUser):
             raise ValueError
         data = response.json()
         self.token = data.get("token")
-        self.search_texts = []
+        self.search_texts = [faker.text()[:2] for text in range(1000)]
     
     @task
     def test_search(self):
